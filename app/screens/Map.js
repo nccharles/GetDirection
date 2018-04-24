@@ -9,40 +9,33 @@ import {
 import styles from '../shared-styles';
 import { RunInfo, RunInfoNumeric } from '../components/footer';
 
+
 let { width, height } = Dimensions.get('window')
 const ASPECT_RATIO = width / height
 const LATITUDE_DELTA = 0.00672
 const LONGITUDE_DELTA = LATITUDE_DELTA * ASPECT_RATIO
 
+const locOptions = {
+  enableHighAccuracy: true,
+  distanceInterval: 3
+}
 class MapScreen extends Component {
 
-  constructor(props) {
-    super(props)
-    this.state = {
-      coords: {},
-      status: 'denied',
-      distanceInfo: null,
-      speedInfo: null
-    };
-    setInterval(() => {
-      this.setState({ speedInfo: Math.random() * 1000000 });
-      this.setState({ distanceInfo: Math.random() * 1500 });
-    }, 1000);
+  state = {
+    coords: {}
   }
 
-  componentWillMount() {
-    this.trackLocation();
+  logData = async () => {
+    await Location.setApiKey('AIzaSyDQBSAVxZozG5WDEj8nbZbtAxXJUFQUOzI');
+    await Location.watchPositionAsync(
+      locOptions,
+      (coords) => this.setState(coords)
+    );
   }
 
-  trackLocation = async () => {
-    const { status } = await Permissions.askAsync(Permissions.LOCATION);
-    if (status === 'granted') {
-      let { coords } = await Location.getCurrentPositionAsync({});
-      this.setState({ coords, status });
-      // console.log(this.state)
-    }
-    return this.state
-  };
+  componentWillUnmount() {
+    Location.watchHeadingAsync().remove()
+  }
 
   renderUserLocation = () => {
 
@@ -59,11 +52,14 @@ class MapScreen extends Component {
   }
 
   render() {
+    this.logData();
+    console.log(this.state.coords)
     const { longitude, latitude } = this.state.coords
     return (
       <View style={styles.container} >
 
-        {this.state.coords.latitude &&
+        {
+          latitude &&
           <MapView
             style={styles.map}
             initialRegion={{
@@ -74,8 +70,8 @@ class MapScreen extends Component {
             }}
           >
             {this.renderUserLocation()}
-          </MapView>}
-
+          </MapView>
+        }
         <View style={styles.infoWrapper}>
           <RunInfoNumeric title='Distance' unit='Km'
             ref={(info) => this.state.distanceInfo = info}
@@ -88,9 +84,9 @@ class MapScreen extends Component {
           />
         </View>
       </View>
+
     );
   }
 }
 
 export default MapScreen;
-
