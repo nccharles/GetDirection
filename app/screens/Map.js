@@ -26,11 +26,15 @@ class MapScreen extends Component {
   }
 
   logData = async () => {
-    await Location.setApiKey('AIzaSyDQBSAVxZozG5WDEj8nbZbtAxXJUFQUOzI');
-    await Location.watchPositionAsync(
-      locOptions,
-      (coords) => this.setState(coords)
-    );
+    let { status } = await Permissions.askAsync(Permissions.LOCATION);
+    if (status === 'granted') {
+      await Location.setApiKey('AIzaSyDQBSAVxZozG5WDEj8nbZbtAxXJUFQUOzI');
+      await Location.watchPositionAsync(
+        locOptions,
+        (coords) => this.setState(coords)
+      );
+    }
+    return;
   }
 
   componentWillUnmount() {
@@ -50,6 +54,7 @@ class MapScreen extends Component {
       />
     );
   }
+
 
   render() {
     this.logData();
