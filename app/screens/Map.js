@@ -11,7 +11,7 @@ import { RunInfo, RunInfoNumeric } from '../components/footer';
 
 let { width, height } = Dimensions.get('window')
 const ASPECT_RATIO = width / height
-const LATITUDE_DELTA = 0.00672
+const LATITUDE_DELTA = 0.00772
 const LONGITUDE_DELTA = LATITUDE_DELTA * ASPECT_RATIO
 
 const locOptions = {
