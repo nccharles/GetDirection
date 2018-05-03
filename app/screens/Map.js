@@ -1,11 +1,10 @@
 import React, { Component } from 'react';
 import { Location, Permissions } from 'expo';
 import MapView from 'react-native-maps';
+import MapViewDirections from 'react-native-maps-directions'
 import {
   Platform, Text, View, StyleSheet, Dimensions
 } from 'react-native';
-
-
 import styles from '../shared-styles';
 import { RunInfo, RunInfoNumeric } from '../components/footer';
 
@@ -19,22 +18,25 @@ const locOptions = {
   enableHighAccuracy: true,
   distanceInterval: 3
 }
+const APIKEY= 'AIzaSyB2L8kbuQG1j0XAeDuYoHm_Ql-8fwRGSms';
 class MapScreen extends Component {
 
   state = {
-    coords: {}
+    coords: {},
   }
 
   logData = async () => {
     let { status } = await Permissions.askAsync(Permissions.LOCATION);
     if (status === 'granted') {
-      await Location.setApiKey('AIzaSyDQBSAVxZozG5WDEj8nbZbtAxXJUFQUOzI');
+      const APIKEY= await Location.setApiKey('AIzaSyB2L8kbuQG1j0XAeDuYoHm_Ql-8fwRGSms');
+      await Location.setApiKey('AIzaSyB2L8kbuQG1j0XAeDuYoHm_Ql-8fwRGSms');
       await Location.watchPositionAsync(
         locOptions,
         (coords) => this.setState(coords)
       );
+    }else{
+      return alert('Enable to Access your location');
     }
-    return;
   }
 
   componentWillUnmount() {
@@ -44,22 +46,36 @@ class MapScreen extends Component {
   renderUserLocation = () => {
 
     const { longitude, latitude } = this.state.coords
+    const coordinates=[
+      {
+        latitude: -1.9793953,
+        longitude: 30.1053328,
+      },
+      {
+        latitude: latitude,
+        longitude: longitude,
+      }
+
+    ]
     return (
-      <MapView.Marker
-        coordinate={{
-          latitude: latitude,
-          longitude: longitude,
-        }}
-        title={'Your location'}
+      <View>
+      <MapView.Marker coordinate={coordinates[0]} title={"Isange Group Ltd, Kigali"}/>
+      <MapView.Marker coordinate={coordinates[1]} title={"Your location"}/>
+      <MapViewDirections 
+      origin={coordinates[1]}
+      destination={coordinates[0]}
+      strokeWidth= {3}
+      apikey={APIKEY}
+      strokeColor="#006442"
       />
+     </View>
     );
   }
 
 
   render() {
     this.logData();
-    console.log(this.state.coords)
-    const { longitude, latitude } = this.state.coords
+    const { longitude, latitude,speed } = this.state.coords
     return (
       <View style={styles.container} >
 
@@ -76,6 +92,7 @@ class MapScreen extends Component {
           >
             {this.renderUserLocation()}
           </MapView>
+
         }
         <View style={styles.infoWrapper}>
           <RunInfoNumeric title='Distance' unit='Km'
